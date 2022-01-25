@@ -1,0 +1,9 @@
+language: go
+
+go:
+  - "1.17"
+  - "master"
+
+script:
+  - go mod download
+  - make test
