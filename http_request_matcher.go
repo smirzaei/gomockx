@@ -48,6 +48,10 @@ func (matcher HttpRequestMatcher) Matches(arg interface{}) bool {
 	}
 }
 
+func (matcher HttpRequestMatcher) String() string {
+	return fmt.Sprintf("request is identical to %v", matcher.expectedRequest)
+}
+
 func NewHttpRequestMatcher(expectedRequest *http.Request) HttpRequestMatcher {
 	return HttpRequestMatcher{
 		expectedRequest: expectedRequest,
