@@ -17,6 +17,10 @@ func (matcher HttpRequestMatcher) Matches(arg interface{}) bool {
 			return false
 		}
 
+		if matcher.expectedRequest.URL.String() != r.URL.String() {
+			return false
+		}
+
 		if !reflect.DeepEqual(matcher.expectedRequest.Header, r.Header) {
 			return false
 		}

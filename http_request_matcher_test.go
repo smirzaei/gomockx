@@ -3,6 +3,7 @@ package gomockx
 import (
 	"bytes"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,6 +47,34 @@ func TestHttpRequestMatcherToReturnFalseIfMethodsAreNotTheSame(t *testing.T) {
 	}
 
 	req2.Method = http.MethodPut
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.False(t, res)
+}
+
+func TestHttpRequestMatcherToReturnFalseIfURLsAreNotTheSame(t *testing.T) {
+	// Arrange
+	req1, err := createSampleRequest(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleRequest(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	newUrl, err := url.Parse("https://go.dev")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2.URL = newUrl
 
 	matcher := NewHttpRequestMatcher(req1)
 
