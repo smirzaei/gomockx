@@ -107,3 +107,24 @@ func TestHttpRequestMatcherToReturnFalseIfHeadersDoNotMatch(t *testing.T) {
 	// Assert
 	assert.False(t, res)
 }
+
+func TestHttpRequestMatcherToReturnFalseIfBodyDoNotMatch(t *testing.T) {
+	// Arrange
+	req1, err := createSampleRequest(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleRequest("a different body")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.False(t, res)
+}

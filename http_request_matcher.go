@@ -1,6 +1,8 @@
 package gomockx
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -22,6 +24,21 @@ func (matcher HttpRequestMatcher) Matches(arg interface{}) bool {
 		}
 
 		if !reflect.DeepEqual(matcher.expectedRequest.Header, r.Header) {
+			return false
+		}
+
+		// This is not the most efficient way but good enough for now.
+		expectedBody, err := io.ReadAll(matcher.expectedRequest.Body)
+		if err != nil {
+			fmt.Printf("warning: failed to read expected request body, because: %+v\n", err)
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("warning: failed to read request body, because: %+v\n", err)
+		}
+
+		if !reflect.DeepEqual(expectedBody, body) {
 			return false
 		}
 
