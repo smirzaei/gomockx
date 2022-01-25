@@ -2,6 +2,7 @@ package gomockx
 
 import (
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -13,6 +14,10 @@ func (matcher HttpRequestMatcher) Matches(arg interface{}) bool {
 	switch r := arg.(type) {
 	case *http.Request:
 		if !strings.EqualFold(matcher.expectedRequest.Method, r.Method) {
+			return false
+		}
+
+		if !reflect.DeepEqual(matcher.expectedRequest.Header, r.Header) {
 			return false
 		}
 

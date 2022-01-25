@@ -55,3 +55,26 @@ func TestHttpRequestMatcherToReturnFalseIfMethodsAreNotTheSame(t *testing.T) {
 	// Assert
 	assert.False(t, res)
 }
+
+func TestHttpRequestMatcherToReturnFalseIfHeadersDoNotMatch(t *testing.T) {
+	// Arrange
+	req1, err := createSampleRequest(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleRequest(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2.Header.Add("x-test", "foo")
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.False(t, res)
+}
