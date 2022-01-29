@@ -27,22 +27,29 @@ func (matcher HttpRequestMatcher) Matches(arg interface{}) bool {
 			return false
 		}
 
-		// This is not the most efficient way but good enough for now.
-		expectedBody, err := io.ReadAll(matcher.expectedRequest.Body)
-		if err != nil {
-			fmt.Printf("warning: failed to read expected request body, because: %+v\n", err)
-		}
+		if matcher.expectedRequest.Body == nil && r.Body == nil {
+			// GET, DELETE, OPTIONS
+			return true
+		} else if matcher.expectedRequest.Body != nil && r.Body != nil {
+			// This is not the most efficient way but good enough for now.
+			expectedBody, err := io.ReadAll(matcher.expectedRequest.Body)
+			if err != nil {
+				fmt.Printf("warning: failed to read expected request body, because: %+v\n", err)
+			}
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			fmt.Printf("warning: failed to read request body, because: %+v\n", err)
-		}
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				fmt.Printf("warning: failed to read request body, because: %+v\n", err)
+			}
 
-		if !reflect.DeepEqual(expectedBody, body) {
+			if !reflect.DeepEqual(expectedBody, body) {
+				return false
+			}
+
+			return true
+		} else {
 			return false
 		}
-
-		return true
 	default:
 		return false
 	}

@@ -13,14 +13,18 @@ const (
 	sampleBody = "foo=bar"
 )
 
-func createSampleRequest(reqBody string) (*http.Request, error) {
+func createSampleGetRequestWithoutBody() (*http.Request, error) {
+	return http.NewRequest(http.MethodGet, "https://httpbin.org/get", nil)
+}
+
+func createSampleRequestWithBody(reqBody string) (*http.Request, error) {
 	bodyReader := bytes.NewReader([]byte(reqBody))
-	return http.NewRequest(http.MethodPost, "https://httpbin.org/get", bodyReader)
+	return http.NewRequest(http.MethodPost, "https://httpbin.org/post", bodyReader)
 }
 
 func TestHttpRequestMatcherToReturnFalseIfArgIsOfADifferentType(t *testing.T) {
 	// Arrange
-	req, err := createSampleRequest(sampleBody)
+	req, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,12 +40,12 @@ func TestHttpRequestMatcherToReturnFalseIfArgIsOfADifferentType(t *testing.T) {
 
 func TestHttpRequestMatcherToReturnFalseIfMethodsAreNotTheSame(t *testing.T) {
 	// Arrange
-	req1, err := createSampleRequest(sampleBody)
+	req1, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req2, err := createSampleRequest(sampleBody)
+	req2, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,12 +63,12 @@ func TestHttpRequestMatcherToReturnFalseIfMethodsAreNotTheSame(t *testing.T) {
 
 func TestHttpRequestMatcherToReturnFalseIfURLsAreNotTheSame(t *testing.T) {
 	// Arrange
-	req1, err := createSampleRequest(sampleBody)
+	req1, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req2, err := createSampleRequest(sampleBody)
+	req2, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,12 +91,12 @@ func TestHttpRequestMatcherToReturnFalseIfURLsAreNotTheSame(t *testing.T) {
 
 func TestHttpRequestMatcherToReturnFalseIfHeadersDoNotMatch(t *testing.T) {
 	// Arrange
-	req1, err := createSampleRequest(sampleBody)
+	req1, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req2, err := createSampleRequest(sampleBody)
+	req2, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,12 +114,12 @@ func TestHttpRequestMatcherToReturnFalseIfHeadersDoNotMatch(t *testing.T) {
 
 func TestHttpRequestMatcherToReturnFalseIfBodyDoNotMatch(t *testing.T) {
 	// Arrange
-	req1, err := createSampleRequest(sampleBody)
+	req1, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req2, err := createSampleRequest("a different body")
+	req2, err := createSampleRequestWithBody("a different body")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,14 +133,81 @@ func TestHttpRequestMatcherToReturnFalseIfBodyDoNotMatch(t *testing.T) {
 	assert.False(t, res)
 }
 
-func TestHttpRequestMatcherToReturnTrueIfEverythingElseIsTheSame(t *testing.T) {
+func TestHttpRequestMatcherToReturnFalseIfTheExpectedReqHasABodyButTheActualDoesNot(t *testing.T) {
 	// Arrange
-	req1, err := createSampleRequest(sampleBody)
+	req1, err := createSampleRequestWithBody(sampleBody)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req2, err := createSampleRequest(sampleBody)
+	req2, err := createSampleGetRequestWithoutBody()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2.Method = req1.Method
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.False(t, res)
+}
+
+func TestHttpRequestMatcherToReturnFalseIfTheExpectedReqDoesNotHaveABodyButTheActualDoes(t *testing.T) {
+	// Arrange
+	req1, err := createSampleGetRequestWithoutBody()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleRequestWithBody(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2.Method = req1.Method
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.False(t, res)
+}
+
+func TestHttpRequestMatcherToReturnTrueIfEverythingElseIsTheSame(t *testing.T) {
+	// Arrange
+	req1, err := createSampleRequestWithBody(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleRequestWithBody(sampleBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	matcher := NewHttpRequestMatcher(req1)
+
+	// Act
+	res := matcher.Matches(req2)
+
+	// Assert
+	assert.True(t, res)
+}
+
+func TestHttpRequestMatcherToReturnTrueIfURLAndHeadersMatchAndBodyIsEmpty(t *testing.T) {
+	// Arrange
+	req1, err := createSampleGetRequestWithoutBody()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2, err := createSampleGetRequestWithoutBody()
 	if err != nil {
 		t.Fatal(err)
 	}
