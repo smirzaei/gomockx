@@ -14,12 +14,12 @@ const (
 )
 
 func createSampleGetRequestWithoutBody() (*http.Request, error) {
-	return http.NewRequest(http.MethodGet, "https://httpbin.org/get", nil)
+	return http.NewRequest(http.MethodGet, "https://httpbin.org", nil)
 }
 
 func createSampleRequestWithBody(reqBody string) (*http.Request, error) {
 	bodyReader := bytes.NewReader([]byte(reqBody))
-	return http.NewRequest(http.MethodPost, "https://httpbin.org/post", bodyReader)
+	return http.NewRequest(http.MethodPost, "https://httpbin.org", bodyReader)
 }
 
 func TestHttpRequestMatcherToReturnFalseIfArgIsOfADifferentType(t *testing.T) {
